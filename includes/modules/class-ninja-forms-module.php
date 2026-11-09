@@ -102,6 +102,23 @@ class NinjaForms_Module extends Module_Base {
 		return null;
 	}
 
+	/**
+	 * Permission ceiling for reading form definitions (SEC-00).
+	 *
+	 * Mirrors the Ninja Forms form builder (REST/AJAX controllers such as
+	 * includes/AJAX/REST/Forms.php): `manage_options`, filterable through
+	 * `ninja_forms_admin_all_forms_capabilities`.
+	 *
+	 * @return \WP_Error|null
+	 */
+	private function require_forms_read() {
+		$cap = \apply_filters( 'ninja_forms_admin_all_forms_capabilities', 'manage_options' );
+		if ( ! \current_user_can( $cap ) ) {
+			return new \WP_Error( 'forbidden', "{$cap} capability required (ninja_forms_admin_all_forms_capabilities)", array( 'status' => 403 ) );
+		}
+		return null;
+	}
+
 	private function form_exists( $form_id ) {
 		$form = \Ninja_Forms()->form( $form_id )->get();
 		return ( $form && $form->get_id() ) ? $form : null;
@@ -127,7 +144,7 @@ class NinjaForms_Module extends Module_Base {
 	}
 
 	public function execute_listForms( $params ) {
-		$deny = $this->require_cap( 'edit_posts' ); if ( $deny ) return $deny;
+		$deny = $this->require_forms_read(); if ( $deny ) return $deny;
 		$out = array();
 		foreach ( \Ninja_Forms()->form()->get_forms() as $form ) {
 			$id = (int) $form->get_id();
@@ -141,7 +158,7 @@ class NinjaForms_Module extends Module_Base {
 	}
 
 	public function execute_getForm( $params ) {
-		$deny = $this->require_cap( 'edit_posts' ); if ( $deny ) return $deny;
+		$deny = $this->require_forms_read(); if ( $deny ) return $deny;
 		$id = \absint( $params['form_id'] ?? 0 );
 		$form = $this->form_exists( $id );
 		if ( ! $form ) return new \WP_Error( 'form_not_found', 'Form not found', array( 'status' => 404 ) );
@@ -153,7 +170,7 @@ class NinjaForms_Module extends Module_Base {
 	}
 
 	public function execute_getFormFields( $params ) {
-		$deny = $this->require_cap( 'edit_posts' ); if ( $deny ) return $deny;
+		$deny = $this->require_forms_read(); if ( $deny ) return $deny;
 		$id = \absint( $params['form_id'] ?? 0 );
 		if ( ! $this->form_exists( $id ) ) return new \WP_Error( 'form_not_found', 'Form not found', array( 'status' => 404 ) );
 		$out = array();
@@ -170,7 +187,7 @@ class NinjaForms_Module extends Module_Base {
 	}
 
 	public function execute_getFormActions( $params ) {
-		$deny = $this->require_cap( 'edit_posts' ); if ( $deny ) return $deny;
+		$deny = $this->require_forms_read(); if ( $deny ) return $deny;
 		$id = \absint( $params['form_id'] ?? 0 );
 		if ( ! $this->form_exists( $id ) ) return new \WP_Error( 'form_not_found', 'Form not found', array( 'status' => 404 ) );
 		$out = array();

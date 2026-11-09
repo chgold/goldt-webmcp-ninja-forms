@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.0 — 2026-11-09
+
+- Breaking: write tools moved to Goldnat for Ninja Forms — Pro (`goldt-webmcp-ninja-forms-pro`). `ninjaforms.updateFormTitle`, `ninjaforms.duplicateForm` and `ninjaforms.deleteSubmission` are no longer in the free add-on; install the Pro add-on to keep them (same tool names). The free add-on is now read only (14 tools).
+- Added readme.txt.
+
 ## 1.1.0 — 2026-11-09
 
 - New (free, read): `ninjaforms.listSubmissions` — submissions with form / date range / status (active, trash, all) / user filters, pagination (`limit`, `page`, `total`, `total_pages`), sequence number and field values.

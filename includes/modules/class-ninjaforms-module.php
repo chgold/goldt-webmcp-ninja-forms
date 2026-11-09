@@ -1,6 +1,9 @@
 <?php
 /**
- * Ninja Forms module — exposes forms, fields, actions and submissions as AI tools.
+ * Ninja Forms module — exposes forms, fields, actions and submissions as read-only AI tools.
+ *
+ * Since 1.2.0 this free add-on is read only; the write tools live in
+ * Goldnat for Ninja Forms — Pro (same `ninjaforms.*` names).
  *
  * @package GoldtWebMCP\NinjaForms
  */
@@ -276,47 +279,6 @@ class NinjaForms_Module extends Module_Base {
 				'required_scope' => 'read',
 			)
 		);
-
-		// ── Writes (pro) ──
-		$this->register_tool(
-			'updateFormTitle',
-			array(
-				'description'    => 'Rename a Ninja Forms form.',
-				'input_schema'   => array(
-					'type'       => 'object',
-					'required'   => array( 'form_id', 'title' ),
-					'properties' => array(
-						'form_id' => array( 'type' => 'integer' ),
-						'title'   => array( 'type' => 'string' ),
-					),
-				),
-				'required_scope' => 'write',
-			)
-		);
-		$this->register_tool(
-			'deleteSubmission',
-			array(
-				'description'    => 'Delete a form submission.',
-				'input_schema'   => array(
-					'type'       => 'object',
-					'required'   => array( 'submission_id' ),
-					'properties' => array( 'submission_id' => array( 'type' => 'integer' ) ),
-				),
-				'required_scope' => 'write',
-			)
-		);
-		$this->register_tool(
-			'duplicateForm',
-			array(
-				'description'    => 'Duplicate an existing form.',
-				'input_schema'   => array(
-					'type'       => 'object',
-					'required'   => array( 'form_id' ),
-					'properties' => array( 'form_id' => array( 'type' => 'integer' ) ),
-				),
-				'required_scope' => 'write',
-			)
-		);
 	}
 
 	/**
@@ -329,19 +291,6 @@ class NinjaForms_Module extends Module_Base {
 	private function limit_param( $params, $fallback ) {
 		$limit = \absint( $params['limit'] ?? $fallback );
 		return $limit ? $limit : $fallback;
-	}
-
-	/**
-	 * Deny unless the current user has a capability.
-	 *
-	 * @param string $cap Capability name.
-	 * @return \WP_Error|null
-	 */
-	private function require_cap( $cap ) {
-		if ( ! \current_user_can( $cap ) ) {
-			return new \WP_Error( 'forbidden', "{$cap} capability required", array( 'status' => 403 ) );
-		}
-		return null;
 	}
 
 	/**
@@ -1185,92 +1134,6 @@ class NinjaForms_Module extends Module_Base {
 				'calculations' => $calcs,
 				'count'        => count( $calcs ),
 				'calc_fields'  => $fields,
-			)
-		);
-	}
-
-	/**
-	 * Tool handler for `ninjaforms.updateFormTitle`.
-	 *
-	 * @param array $params Validated tool input.
-	 * @return array|\WP_Error
-	 */
-	public function execute_updateFormTitle( $params ) {
-		$deny = $this->require_cap( 'manage_options' );
-		if ( $deny ) {
-			return $deny;
-		}
-		$id   = \absint( $params['form_id'] ?? 0 );
-		$form = $this->form_exists( $id );
-		if ( ! $form ) {
-			return new \WP_Error( 'form_not_found', 'Form not found', array( 'status' => 404 ) );
-		}
-		$title = \sanitize_text_field( $params['title'] ?? '' );
-		if ( '' === $title ) {
-			return new \WP_Error( 'missing_parameter', 'title required', array( 'status' => 400 ) );
-		}
-		$form->update_setting( 'title', $title )->save();
-		return $this->success_response(
-			array(
-				'form_id' => $id,
-				'title'   => $title,
-			)
-		);
-	}
-
-	/**
-	 * Tool handler for `ninjaforms.deleteSubmission`.
-	 *
-	 * @param array $params Validated tool input.
-	 * @return array|\WP_Error
-	 */
-	public function execute_deleteSubmission( $params ) {
-		$deny = $this->require_cap( 'manage_options' );
-		if ( $deny ) {
-			return $deny;
-		}
-		$sid = \absint( $params['submission_id'] ?? 0 );
-		$sub = $sid ? \get_post( $sid ) : null;
-		if ( ! $sub || 'nf_sub' !== $sub->post_type ) {
-			return new \WP_Error( 'submission_not_found', 'Submission not found', array( 'status' => 404 ) );
-		}
-		$ok = \wp_delete_post( $sid, true );
-		return $this->success_response(
-			array(
-				'submission_id' => $sid,
-				'deleted'       => (bool) $ok,
-			)
-		);
-	}
-
-	/**
-	 * Tool handler for `ninjaforms.duplicateForm`.
-	 *
-	 * @param array $params Validated tool input.
-	 * @return array|\WP_Error
-	 */
-	public function execute_duplicateForm( $params ) {
-		$deny = $this->require_cap( 'manage_options' );
-		if ( $deny ) {
-			return $deny;
-		}
-		$id = \absint( $params['form_id'] ?? 0 );
-		if ( ! $this->form_exists( $id ) ) {
-			return new \WP_Error( 'form_not_found', 'Form not found', array( 'status' => 404 ) );
-		}
-		$new_id = null;
-		try {
-			$new_id = \Ninja_Forms()->form( $id )->duplicate();
-		} catch ( \Throwable $e ) {
-			$new_id = null;
-		}
-		if ( ! $new_id ) {
-			return new \WP_Error( 'duplicate_failed', 'Ninja Forms duplicate API unavailable in this version', array( 'status' => 501 ) );
-		}
-		return $this->success_response(
-			array(
-				'source_form_id' => $id,
-				'new_form_id'    => (int) $new_id,
 			)
 		);
 	}

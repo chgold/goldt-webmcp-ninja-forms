@@ -11,6 +11,7 @@
  * Requires PHP: 7.4
  * Requires Plugins: goldt-webmcp-bridge, ninja-forms
  * Text Domain: goldt-webmcp-ninja-forms
+ *
  * @package GoldtWebMCP\NinjaForms
  */
 
@@ -28,26 +29,36 @@ define( 'GOLDTWMCP_NF_PATH', plugin_dir_path( __FILE__ ) );
  */
 function goldtwmcp_nf_check_dependencies() {
 	if ( ! defined( 'GOLDTWMCP_VERSION' ) ) {
-		add_action( 'admin_notices', function () {
-			echo '<div class="notice notice-error"><p><strong>Goldnat for Ninja Forms:</strong> Requires the free Goldnat WebMCP Bridge plugin.</p></div>';
-		} );
+		add_action(
+			'admin_notices',
+			function () {
+				echo '<div class="notice notice-error"><p><strong>Goldnat for Ninja Forms:</strong> Requires the free Goldnat WebMCP Bridge plugin.</p></div>';
+			}
+		);
 		return false;
 	}
 	if ( ! function_exists( 'Ninja_Forms' ) ) {
-		add_action( 'admin_notices', function () {
-			echo '<div class="notice notice-error"><p><strong>Goldnat for Ninja Forms:</strong> Requires the Ninja Forms plugin.</p></div>';
-		} );
+		add_action(
+			'admin_notices',
+			function () {
+				echo '<div class="notice notice-error"><p><strong>Goldnat for Ninja Forms:</strong> Requires the Ninja Forms plugin.</p></div>';
+			}
+		);
 		return false;
 	}
 	return true;
 }
 
-add_action( 'plugins_loaded', function () {
-	if ( ! goldtwmcp_nf_check_dependencies() ) {
-		return;
-	}
-	add_action( 'goldtwmcp_register_modules', 'goldtwmcp_nf_register_modules' );
-}, 30 );
+add_action(
+	'plugins_loaded',
+	function () {
+		if ( ! goldtwmcp_nf_check_dependencies() ) {
+			return;
+		}
+		add_action( 'goldtwmcp_register_modules', 'goldtwmcp_nf_register_modules' );
+	},
+	30
+);
 
 /**
  * Instantiate + register the Ninja Forms module.
@@ -56,7 +67,7 @@ add_action( 'plugins_loaded', function () {
  * @return void
  */
 function goldtwmcp_nf_register_modules( $goldtwmcp ) {
-	require_once GOLDTWMCP_NF_PATH . 'includes/modules/class-ninja-forms-module.php';
+	require_once GOLDTWMCP_NF_PATH . 'includes/modules/class-ninjaforms-module.php';
 	$manifest = $goldtwmcp->get_manifest_instance();
 	$module   = new \GoldtWebMCP\Modules\NinjaForms_Module( $manifest );
 	$goldtwmcp->register_external_module( 'ninjaforms', $module );

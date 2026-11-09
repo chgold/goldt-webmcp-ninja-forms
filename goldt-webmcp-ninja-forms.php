@@ -3,7 +3,7 @@
  * Plugin Name: Goldnat for Ninja Forms
  * Plugin URI: https://goldnat.ai/plugins/goldt-webmcp-ninja-forms
  * Description: Ninja Forms integration for Goldnat — exposes forms, fields, actions and submissions as AI tools via the Goldnat WebMCP Bridge.
- * Version: 1.0.1
+ * Version: 1.1.0
  * Author: chgold
  * Author URI: https://goldnat.ai/
  * License: Proprietary
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'GOLDTWMCP_NF_VERSION', '1.0.1' );
+define( 'GOLDTWMCP_NF_VERSION', '1.1.0' );
 define( 'GOLDTWMCP_NF_PATH', plugin_dir_path( __FILE__ ) );
 
 /**
